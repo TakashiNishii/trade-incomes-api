@@ -1,2 +1,2 @@
-# trade-incomes-api
+# Trade Incomes API
 Trade Incomes system's API
