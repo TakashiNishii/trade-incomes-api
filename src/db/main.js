@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 
-mongoose.connect('mongodb://localhost/trade-incomes', { useNewUrlParser: true })
+mongoose.connect('mongodb://localhost/trade-incomes', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
 
 mongoose.Promise = global.Promise
 
