@@ -31,28 +31,25 @@ const userLogin = async (req, res) => {
 
   try {
     const user = await User.findOne({ email })
-    if (user) {
-      bcrypt.compare(password, user.password, (err, result) => {
-        if (err) {
-          console.error(err)
-          res.status(400).json({
-            error: `Password don't match`
-          })
-        }
 
-        if (result) {
-          const token = jwt.sign({ email, password }, 'baguvix')
-          res.status(200).json({ token })
-        }
-      })
+    if (user) {
+      const match = await bcrypt.compare(password, user.password)
+
+      if (match) {
+        const token = jwt.sign({ email, password }, 'baguvix')
+        res.status(200).json({ token })
+      } else {
+        res.status(400).json({
+          error: `Password don't match`
+        })
+      }
     } else {
-      throw new Error('fail')
+      res.status(400).json({
+        error: `User not found`
+      })
     }
-  } catch (err) {
-    console.log(err)
-    return res.status(400).send({
-      error: 'login failed'
-    })
+  } catch (error) {
+    return res.status(400).send({ error })
   }
 }
 
