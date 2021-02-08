@@ -13,6 +13,7 @@ const userRegister = async (req, res) => {
         })
       }
       const { name, email } = req.body
+      // TODO: verificar registros duplicados
       const user = await User.create({
         name,
         email,
