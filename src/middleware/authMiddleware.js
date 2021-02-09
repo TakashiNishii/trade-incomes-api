@@ -7,11 +7,9 @@ const verifyAdmin = (req, res, next) => {
   if (bearer) {
     const token = bearer.split(' ')[1]
     jwt.verify(token, 'baguvix', async (err, user) => {
-      if (err) return res.status(403).send({ error: 'invalid jwt' })
+      if (err) return res.status(401).send({ error: 'invalid jwt' })
 
       if (user) {
-        console.log(user)
-
         const isAdmin = await User.findOne({
           email: user.email,
           admin: true
@@ -22,7 +20,7 @@ const verifyAdmin = (req, res, next) => {
       }
     })
   } else {
-    return res.status(403).send({ error: 'not authorized' })
+    return res.status(401).send({ error: 'not authorized' })
   }
 }
 

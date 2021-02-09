@@ -43,12 +43,12 @@ const userLogin = async (req, res) => {
         )
         res.status(200).json({ token })
       } else {
-        res.status(400).json({
+        res.status(406).json({
           error: `Password don't match`
         })
       }
     } else {
-      res.status(400).json({
+      res.status(404).json({
         error: `User not found`
       })
     }
