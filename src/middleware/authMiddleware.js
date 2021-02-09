@@ -4,24 +4,29 @@ const User = require('../models/user')
 
 const verifyAdmin = (req, res, next) => {
   const bearer = req.headers.authorization
-  if (bearer) {
-    const token = bearer.split(' ')[1]
-    jwt.verify(token, 'baguvix', async (err, user) => {
-      if (err) return res.status(401).send({ error: 'invalid jwt' })
 
-      if (user) {
-        const isAdmin = await User.findOne({
-          email: user.email,
-          admin: true
-        }).lean()
-
-        if (!isAdmin) return res.status(403).send({ error: 'not authorized' })
-        else next()
-      }
-    })
-  } else {
+  if (!bearer) {
     return res.status(401).send({ error: 'not authorized' })
   }
+
+  const token = bearer.split(' ')[1]
+
+  jwt.verify(token, process.env.SECRET_KEY, async (gotError, user) => {
+    if (gotError) {
+      return res.status(401).send({ error: 'invalid jwt' })
+    }
+
+    const isAdmin = await User.findOne({
+      email: user.email,
+      admin: true
+    }).lean()
+
+    if (!isAdmin) {
+      return res.status(403).send({ error: 'not authorized' })
+    } else {
+      next()
+    }
+  })
 }
 
 module.exports = { verifyAdmin }
