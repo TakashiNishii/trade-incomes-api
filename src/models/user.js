@@ -21,6 +21,16 @@ const UserSchema = new mongoose.Schema({
   admin: {
     type: Boolean,
     default: false
+  },
+
+  resetPassToken: {
+    type: String,
+    select: false
+  },
+
+  resetPassExp: {
+    type: Date,
+    select: false
   }
 })
 
