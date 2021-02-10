@@ -1,7 +1,10 @@
 const User = require('../models/user')
 
+const crypto = require('crypto')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+
+const mailer = require('../modules/mail')
 
 const userRegister = async (req, res) => {
   try {
@@ -21,7 +24,6 @@ const userRegister = async (req, res) => {
       return res.send({ user })
     })
   } catch (err) {
-    console.log(err)
     return res.status(400).send({ error: 'register failed' })
   }
 }
@@ -52,7 +54,55 @@ const userLogin = async (req, res) => {
   }
 }
 
+const forgotPassword = async (req, res) => {
+  const { email } = req.body
+
+  try {
+    const user = await User.findOne({ email })
+
+    if (!user) {
+      res.status(404).json({ error: `User not found` })
+    }
+
+    const token = crypto.randomBytes(20).toString('hex')
+    const now = new Date()
+    now.setHours(now.getHours() + 1)
+
+    await User.findByIdAndUpdate(
+      user.id,
+      {
+        $set: {
+          resetPassToken: token,
+          resetPassExp: now
+        }
+      },
+      { useFindAndModify: false }
+    )
+    // TODO: EMAIL CHECK => registration and so on
+    mailer.sendMail(
+      {
+        to: 'leaxviana140@gmail.com',
+        from: 'leandrovianacodes@gmail.com',
+        template: 'forgot',
+        context: { token }
+      },
+      err => {
+        if (err) {
+          return res
+            .status(400)
+            .send({ error: 'Cannot send forgot email to user`s email' })
+        }
+
+        return res.status(200).send()
+      }
+    )
+  } catch (error) {
+    return res.status(400).send({ error })
+  }
+}
+
 module.exports = {
   userRegister,
-  userLogin
+  userLogin,
+  forgotPassword
 }
