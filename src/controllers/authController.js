@@ -42,7 +42,7 @@ const userLogin = async (req, res) => {
   const { email, password } = req.body
 
   try {
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email }).select('+password')
 
     if (!user) {
       res.status(404).json({ error: `User not found` })
@@ -68,6 +68,10 @@ const forgotPassword = async (req, res) => {
   const { email } = req.body
 
   try {
+    // if (!validator.isEmail(email)) {
+    //   return res.status(400).send({ error: 'Email is malformatted' })
+    // }
+
     const user = await User.findOne({ email })
 
     if (!user) {
@@ -88,7 +92,7 @@ const forgotPassword = async (req, res) => {
       },
       { useFindAndModify: false }
     )
-    // TODO: EMAIL CHECK => registration and so on
+    // TODO: EMAIL PROVIDER
     mailer.sendMail(
       {
         to: 'leaxviana140@gmail.com',
@@ -100,7 +104,7 @@ const forgotPassword = async (req, res) => {
         if (err) {
           return res
             .status(400)
-            .send({ error: 'Cannot send forgot email to user`s email' })
+            .send({ error: `Cannot send forgot passowrd to user's email` })
         }
 
         return res.status(200).send()
@@ -111,8 +115,48 @@ const forgotPassword = async (req, res) => {
   }
 }
 
+const resetPassword = async (req, res) => {
+  const { email, token, password } = req.body
+
+  try {
+    const user = await User.findOne({ email }).select(
+      '+resetPassToken resetPassExp'
+    )
+
+    if (!user) {
+      res.status(404).json({ error: `User not found` })
+    }
+
+    if (token !== user.resetPassToken) {
+      res.status(404).json({ error: `Invalid token` })
+    }
+
+    const now = new Date()
+    if (now > user.resetPassExp) {
+      res.status(404).json({ error: `Token expired` })
+    }
+
+    bcrypt.hash(req.body.password, 8, async (gotError, hashedPass) => {
+      if (gotError) {
+        return res.status(400).send({
+          error: 'register failed'
+        })
+      }
+
+      user.password = hashedPass
+
+      await user.save()
+
+      res.send()
+    })
+  } catch (error) {
+    return res.status(400).send({ error })
+  }
+}
+
 module.exports = {
   userRegister,
   userLogin,
-  forgotPassword
+  forgotPassword,
+  resetPassword
 }
