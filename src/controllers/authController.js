@@ -92,11 +92,12 @@ const forgotPassword = async (req, res) => {
       },
       { useFindAndModify: false }
     )
-    // TODO: EMAIL PROVIDER
     mailer.sendMail(
       {
-        to: 'leaxviana140@gmail.com',
+        to: email,
+        // EMAIL DO GABRIEL AQUI
         from: 'leandrovianacodes@gmail.com',
+        // TODO: FAZER O TEMPLATE
         template: 'forgot',
         context: { token }
       },
