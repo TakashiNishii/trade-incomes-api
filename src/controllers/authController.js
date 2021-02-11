@@ -3,6 +3,7 @@ const User = require('../models/user')
 const crypto = require('crypto')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const validator = require('validator')
 
 const mailer = require('../modules/mail')
 
@@ -15,7 +16,16 @@ const userRegister = async (req, res) => {
         })
       }
       const { name, email } = req.body
-      // TODO: verificar registros duplicados
+      const findedUser = await User.findOne({ email }).lean()
+
+      if (findedUser) {
+        return res.status(400).send({ error: 'User already registered' })
+      }
+
+      if (!validator.isEmail(email)) {
+        return res.status(400).send({ error: 'Email is malformatted' })
+      }
+
       const user = await User.create({
         name,
         email,
