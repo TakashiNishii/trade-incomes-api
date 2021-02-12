@@ -4,11 +4,7 @@ const authMiddleware = require('../middlewares/authMiddleware')
 
 const router = Router()
 
-router.post(
-  '/register',
-  authMiddleware.verifyAdmin,
-  authController.userRegister
-)
+router.post('/register', authController.userRegister)
 router.post('/login', authController.userLogin)
 router.post('/forgot-password', authController.forgotPassword)
 router.post('/reset-password', authController.resetPassword)
