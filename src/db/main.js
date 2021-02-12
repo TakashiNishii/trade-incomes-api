@@ -7,14 +7,11 @@ if (process.env.NODE_ENV === 'development') {
     useCreateIndex: true
   })
 } else {
-  mongoose.connect(
-    'mongodb://pixel:thrasher123@geonosis.mongodb.umbler.com:41435/trade-incomes',
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true
-    }
-  )
+  mongoose.connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true
+  })
 }
 
 mongoose.Promise = global.Promise
