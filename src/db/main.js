@@ -1,18 +1,13 @@
 const mongoose = require('mongoose')
 
-if (process.env.NODE_ENV === 'development') {
-  mongoose.connect('mongodb://localhost/trade-incomes', {
+mongoose.connect(
+  'mongodb+srv://admin:admin@trade-incomes.va36r.mongodb.net/tradeincomes?retryWrites=true&w=majority',
+  {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
-  })
-} else {
-  mongoose.connect(process.env.MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true
-  })
-}
+  }
+)
 
 mongoose.Promise = global.Promise
 
