@@ -1,23 +1,24 @@
 const express = require('express')
-const bodyParser = require('body-parser')
+const { json, urlencoded } = require('body-parser')
 
-const dotenv = require('dotenv')
-dotenv.config()
+require('dotenv').config()
 
 const app = express()
 const api = express()
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(json())
+app.use(urlencoded({ extended: false }))
 
 const authRoutes = require('./routes/auth')
+const managerRoutes = require('./routes/manager')
+
 app.use('/auth/', authRoutes)
+app.use('', managerRoutes)
 
 api.use('/api', app)
 
 const server = api.listen(3000, () => {
-  const host = server.address().address
-  const port = server.address().port
+  const { address, port } = server.address()
 
-  console.log(`Server listening at http://${host}:${port}`)
+  console.log(`Server listening at http://${address}:${port}`)
 })

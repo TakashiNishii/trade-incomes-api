@@ -45,20 +45,20 @@ const userLogin = async (req, res) => {
     const user = await User.findOne({ email }).select('+password')
 
     if (!user) {
-      res.status(404).json({ error: `User not found` })
+      return res.status(404).json({ error: `User not found` })
     }
 
     const match = await bcrypt.compare(password, user.password)
 
     if (!match) {
-      res.status(406).json({ error: `Password don't match` })
+      return res.status(406).json({ error: `Password don't match` })
     }
 
     const token = jwt.sign(
       { email, password, admin: user.admin },
       process.env.SECRET_KEY
     )
-    res.status(200).json({ token })
+    return res.status(200).json({ token })
   } catch (error) {
     return res.status(400).send({ error })
   }
@@ -68,14 +68,14 @@ const forgotPassword = async (req, res) => {
   const { email } = req.body
 
   try {
-    // if (!validator.isEmail(email)) {
-    //   return res.status(400).send({ error: 'Email is malformatted' })
-    // }
+    if (!validator.isEmail(email)) {
+      return res.status(400).send({ error: 'Email is malformatted' })
+    }
 
     const user = await User.findOne({ email })
 
     if (!user) {
-      res.status(404).json({ error: `User not found` })
+      return res.status(404).json({ error: `User not found` })
     }
 
     const token = crypto.randomBytes(20).toString('hex')
@@ -92,32 +92,32 @@ const forgotPassword = async (req, res) => {
       },
       { useFindAndModify: false }
     )
-    mailer.sendMail(
-      {
-        to: email,
-        // EMAIL DO GABRIEL AQUI
-        from: 'leandrovianacodes@gmail.com',
-        // TODO: FAZER O TEMPLATE
-        template: 'forgot',
-        context: { token }
-      },
-      err => {
-        if (err) {
-          return res
-            .status(400)
-            .send({ error: `Cannot send forgot passowrd to user's email` })
-        }
 
-        return res.status(200).send()
+    const mailOptions = {
+      to: email,
+      // EMAIL DO GABRIEL AQUI
+      from: 'leandrovianacodes@gmail.com',
+      // TODO: FAZER O TEMPLATE
+      template: 'forgot',
+      context: { token }
+    }
+
+    mailer.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        return res
+          .status(400)
+          .send({ error: `Cannot send forgot passowrd to user's email` })
       }
-    )
+
+      return res.status(200).json(info)
+    })
   } catch (error) {
     return res.status(400).send({ error })
   }
 }
 
 const resetPassword = async (req, res) => {
-  const { email, token, password } = req.body
+  const { email, token } = req.body
 
   try {
     const user = await User.findOne({ email }).select(
@@ -125,16 +125,16 @@ const resetPassword = async (req, res) => {
     )
 
     if (!user) {
-      res.status(404).json({ error: `User not found` })
+      return res.status(404).json({ error: `User not found` })
     }
 
     if (token !== user.resetPassToken) {
-      res.status(404).json({ error: `Invalid token` })
+      return res.status(404).json({ error: `Invalid token` })
     }
 
     const now = new Date()
     if (now > user.resetPassExp) {
-      res.status(404).json({ error: `Token expired` })
+      return res.status(404).json({ error: `Token expired` })
     }
 
     bcrypt.hash(req.body.password, 8, async (gotError, hashedPass) => {
@@ -148,7 +148,7 @@ const resetPassword = async (req, res) => {
 
       await user.save()
 
-      res.send()
+      return res.send()
     })
   } catch (error) {
     return res.status(400).send({ error })
