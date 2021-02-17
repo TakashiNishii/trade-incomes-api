@@ -11,9 +11,11 @@ app.use(urlencoded({ extended: false }))
 
 const authRoutes = require('./routes/auth')
 const managerRoutes = require('./routes/manager')
+const userRoutes = require('./routes/user')
 
-app.use('/auth/', authRoutes)
-app.use('', managerRoutes)
+app.use('/auth', authRoutes)
+app.use('/manager', managerRoutes)
+app.use('/user', userRoutes)
 
 api.use('/api', app)
 
