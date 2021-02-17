@@ -29,6 +29,17 @@ const UserSchema = new mongoose.Schema({
     select: false
   },
 
+  incomes: {
+    valueInvested: {
+      type: Number,
+      default: 0
+    },
+    valueGain: {
+      type: Number,
+      default: 0
+    }
+  },
+
   resetPassExp: {
     type: Date,
     select: false
