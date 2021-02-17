@@ -1,11 +1,9 @@
 const { Router } = require('express')
-const authController = require('../controllers/authController')
+const userController = require('../controllers/userController')
 const authMiddleware = require('../middlewares/authMiddleware')
 
 const router = Router()
 
-router.get('/incomes', (req, res) => {
-    
-})
+router.get('/incomes', authMiddleware.verifyUser, userController.show)
 
 module.exports = router
