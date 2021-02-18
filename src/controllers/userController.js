@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const show = async (req, res) => {
   const token = req.headers.authorization.split(' ')[1]
 
+
   try {
     const user = await jwt.verify(token, process.env.SECRET_KEY)
 
