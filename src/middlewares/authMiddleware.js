@@ -1,56 +1,43 @@
 const jwt = require('jsonwebtoken')
-
 const User = require('../models/user')
 
 const verifyAdmin = (req, res, next) => {
-  const bearer = req.headers.authorization
-
-  if (!bearer) {
-    return res.status(401).send({ error: 'not authorized' })
-  }
-
-  const token = bearer.split(' ')[1]
-
-  jwt.verify(token, process.env.SECRET_KEY, async (gotError, user) => {
-    if (gotError) {
-      return res.status(401).send({ error: 'invalid jwt' })
-    }
-
-    const isAdmin = await User.findOne({
-      email: user.email,
-      admin: true
-    }).lean()
-
-    if (!isAdmin) {
-      return res.status(403).send({ error: 'not authorized' })
-    } else {
-      next()
-    }
-  })
+  verifyUserIsAdminOrNot(req, res, next, true)
 }
 
 const verifyUser = (req, res, next) => {
-  const bearer = req.headers.authorization
-
-  if (!bearer) {
-    return res.status(401).send({ error: 'not authorized' })
-  }
-
-  const token = bearer.split(' ')[1]
-
-  jwt.verify(token, process.env.SECRET_KEY, async (gotError, user) => {
-    if (gotError) {
-      return res.status(401).send({ error: 'invalid jwt' })
-    }
-
-    const isUser = await User.findOne({ email: user.email }).lean()
-
-    if (!isUser) {
-      return res.status(403).send({ error: 'not authorized' })
-    } else {
-      next()
-    }
-  })
+  verifyUserIsAdminOrNot(req, res, next)
 }
 
-module.exports = { verifyAdmin, verifyUser }
+const verifyUserIsAdminOrNot = async (req, res, next, admin = false) => {
+  const token = req.headers.authorization.split(' ')[1]
+
+  if (!token) {
+    return res.status(401).json({ error: 'not authorized' })
+  }
+
+  try {
+    const user = await jwt.verify(token, process.env.SECRET_KEY)
+
+    let searchOption = {
+      email: user.email
+    }
+
+    if (admin) searchOption = { ...searchOption, admin }
+
+    const isAuthorized = await User.findOne(searchOption).lean()
+
+    if (!isAuthorized) {
+      return res.status(403).json({ error: 'not authorized' })
+    }
+
+    next()
+  } catch (error) {
+    return res.status(401).json({ error: 'invalid jwt' })
+  }
+}
+
+module.exports = {
+  verifyAdmin,
+  verifyUser
+}
