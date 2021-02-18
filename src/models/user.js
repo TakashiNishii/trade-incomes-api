@@ -13,6 +13,12 @@ const UserSchema = new mongoose.Schema({
     lowercase: true
   },
 
+  cpf: {
+    type: String,
+    require: true,
+    unique: true
+  },
+
   password: {
     type: String,
     required: true,
@@ -27,6 +33,27 @@ const UserSchema = new mongoose.Schema({
     earnedValue: {
       type: Number,
       default: 0
+    }
+  },
+
+  bankData: {
+    pix: {
+      type: String,
+      default: ''
+    },
+    ted: {
+      agency: {
+        type: String,
+        default: ''
+      },
+      account: {
+        type: String,
+        default: ''
+      },
+      bank: {
+        type: Number,
+        default: 0
+      }
     }
   },
 
