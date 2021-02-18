@@ -11,7 +11,7 @@ router.post(
 )
 
 router.post('/login', authController.userLogin)
-router.post('/forgot-password', authController.forgotPassword)
 router.post('/reset-password', authController.resetPassword)
+router.post('/forgot-password', authController.forgotPassword)
 
 module.exports = router

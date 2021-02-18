@@ -19,6 +19,17 @@ const UserSchema = new mongoose.Schema({
     select: false
   },
 
+  incomes: {
+    amountInvested: {
+      type: Number,
+      default: 0
+    },
+    earnedValue: {
+      type: Number,
+      default: 0
+    }
+  },
+
   admin: {
     type: Boolean,
     default: false
@@ -27,17 +38,6 @@ const UserSchema = new mongoose.Schema({
   resetPassToken: {
     type: String,
     select: false
-  },
-
-  incomes: {
-    valueInvested: {
-      type: Number,
-      default: 0
-    },
-    valueGain: {
-      type: Number,
-      default: 0
-    }
   },
 
   resetPassExp: {

@@ -7,11 +7,21 @@ const userPatch = async (req, res) => {
   const { email, newEmail, name, password } = req.body
 
   if (!validator.isEmail(email)) {
-    return res.status(400).send({ error: 'Email is malformatted' })
+    return res.status(400).json({ error: 'Email is malformatted' })
   }
 
   if (newEmail && !validator.isEmail(newEmail)) {
-    return res.status(400).send({ error: 'NewEmail is malformatted' })
+    return res.status(400).json({ error: 'NewEmail is malformatted' })
+  }
+
+  const userFindedWithNewEmail = await User.findOne({
+    email: newEmail
+  }).lean()
+
+  if (newEmail && userFindedWithNewEmail) {
+    return res.status(404).json({
+      error: `new email is not valid because you already registered`
+    })
   }
 
   const user = await User.findOne({ email }).select('+password')
@@ -21,27 +31,24 @@ const userPatch = async (req, res) => {
   }
 
   try {
-    let bcryptResult = null
 
-    if (password) {
-      bcryptResult = await bcrypt.hash(password, 8)
+    const bcryptResult = password && (await bcrypt.hash(password, 8))
+
+    const userUpdates = {
+      email: newEmail || email,
+      name: name || user.name,
+      password: bcryptResult || user.password
     }
 
-    const userPatch = await User.findByIdAndUpdate(
-      user.id,
-      {
-        $set: {
-          email: newEmail || email,
-          name: name || user.name,
-          password: bcryptResult || user.password
-        }
-      },
+    const userPatch = await User.findOneAndUpdate(
+      { _id: user.id },
+      userUpdates,
       { useFindAndModify: false }
     )
 
     return res.json(userPatch)
   } catch (error) {
-    return res.status(400).send({ error })
+    return res.status(400).json({ error: 'user cannot be updated' })
   }
 }
 
@@ -49,7 +56,7 @@ const userDelete = async (req, res) => {
   const { email } = req.body
 
   if (!validator.isEmail(email)) {
-    return res.status(400).send({ error: 'Email is malformatted' })
+    return res.status(400).json({ error: 'Email is malformatted' })
   }
 
   const user = await User.findOne({ email })
@@ -63,9 +70,10 @@ const userDelete = async (req, res) => {
       { _id: user.id },
       { useFindAndModify: false }
     )
+
     return res.json({ message: 'User deleted' })
   } catch (error) {
-    return res.status(400).send({ error: 'User cannot is deleted' })
+    return res.status(400).json({ error: 'User cannot is deleted' })
   }
 }
 
@@ -80,10 +88,10 @@ const userIndex = async (_req, res) => {
 }
 
 const incomesPut = async (req, res) => {
-  const { email, valueInvested, valueGain } = req.body
+  const { email, amountInvested, earnedValue } = req.body
 
   if (!validator.isEmail(email)) {
-    return res.status(400).send({ error: 'Email is malformatted' })
+    return res.status(400).json({ error: 'Email is malformatted' })
   }
 
   const user = await User.findOne({ email })
@@ -95,16 +103,18 @@ const incomesPut = async (req, res) => {
   try {
     const incomesUpdated = {
       incomes: {
-        valueInvested,
-        valueGain
+        amountInvested,
+        earnedValue
       }
     }
+
     await User.findOneAndUpdate({ _id: user.id }, incomesUpdated, {
       useFindAndModify: false
     })
+
     return res.json({ message: 'User incomes updated' })
   } catch (error) {
-    return res.status(400).send({ error: 'Cannot input incomes' })
+    return res.status(400).json({ error: 'Cannot input incomes' })
   }
 }
 

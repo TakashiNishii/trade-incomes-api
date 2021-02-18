@@ -8,33 +8,30 @@ const validator = require('validator')
 const mailer = require('../modules/mail')
 
 const userRegister = async (req, res) => {
+  const { name, email, password } = req.body
+
   try {
-    bcrypt.hash(req.body.password, 8, async (gotError, hashedPass) => {
-      if (gotError) {
-        return res.status(400).send({
-          error: 'register failed'
-        })
-      }
-      const { name, email } = req.body
-      const findedUser = await User.findOne({ email }).lean()
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ error: 'Email is malformatted' })
+    }
 
-      if (findedUser) {
-        return res.status(400).send({ error: 'User already registered' })
-      }
+    const findedUser = await User.findOne({ email }).lean()
 
-      if (!validator.isEmail(email)) {
-        return res.status(400).send({ error: 'Email is malformatted' })
-      }
+    if (findedUser) {
+      return res.status(400).json({ error: 'User already registered' })
+    }
 
-      const user = await User.create({
-        name,
-        email,
-        password: hashedPass
-      })
-      return res.send({ user })
+    const hashedPass = await bcrypt.hash(password, 8)
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPass
     })
-  } catch (err) {
-    return res.status(400).send({ error: 'register failed' })
+
+    return res.json({ user })
+  } catch (error) {
+    return res.status(400).json({ error: 'register failed' })
   }
 }
 
@@ -42,6 +39,10 @@ const userLogin = async (req, res) => {
   const { email, password } = req.body
 
   try {
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ error: 'Email is malformatted' })
+    }
+
     const user = await User.findOne({ email }).select('+password')
 
     if (!user) {
@@ -58,9 +59,10 @@ const userLogin = async (req, res) => {
       { email, password, admin: user.admin },
       process.env.SECRET_KEY
     )
+
     return res.status(200).json({ token })
   } catch (error) {
-    return res.status(400).send({ error })
+    return res.status(400).json({ error: 'Login error' })
   }
 }
 
@@ -69,7 +71,7 @@ const forgotPassword = async (req, res) => {
 
   try {
     if (!validator.isEmail(email)) {
-      return res.status(400).send({ error: 'Email is malformatted' })
+      return res.status(400).json({ error: 'Email is malformatted' })
     }
 
     const user = await User.findOne({ email })
@@ -79,19 +81,18 @@ const forgotPassword = async (req, res) => {
     }
 
     const token = crypto.randomBytes(20).toString('hex')
+
     const now = new Date()
     now.setHours(now.getHours() + 1)
 
-    await User.findByIdAndUpdate(
-      user.id,
-      {
-        $set: {
-          resetPassToken: token,
-          resetPassExp: now
-        }
-      },
-      { useFindAndModify: false }
-    )
+    const resetPass = {
+      resetPassToken: token,
+      resetPassExp: now
+    }
+
+    await User.findOneAndUpdate({ _id: user.id }, resetPass, {
+      useFindAndModify: false
+    })
 
     const mailOptions = {
       to: email,
@@ -106,13 +107,13 @@ const forgotPassword = async (req, res) => {
       if (err) {
         return res
           .status(400)
-          .send({ error: `Cannot send forgot passowrd to user's email` })
+          .json({ error: `Cannot send forgot passoword to user's email` })
       }
 
       return res.status(200).json(info)
     })
   } catch (error) {
-    return res.status(400).send({ error })
+    return res.status(400).json({ error })
   }
 }
 
@@ -120,6 +121,10 @@ const resetPassword = async (req, res) => {
   const { email, token } = req.body
 
   try {
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ error: 'Email is malformatted' })
+    }
+
     const user = await User.findOne({ email }).select(
       '+resetPassToken resetPassExp'
     )
@@ -137,21 +142,15 @@ const resetPassword = async (req, res) => {
       return res.status(404).json({ error: `Token expired` })
     }
 
-    bcrypt.hash(req.body.password, 8, async (gotError, hashedPass) => {
-      if (gotError) {
-        return res.status(400).send({
-          error: 'register failed'
-        })
-      }
-
-      user.password = hashedPass
-
+    try {
+      user.password = await bcrypt.hash(req.body.password, 8)
       await user.save()
-
-      return res.send()
-    })
+    } catch (error) {
+      return res.status(400).json({ error: 'register failed' })
+    }
+    return res.sendStatus(200)
   } catch (error) {
-    return res.status(400).send({ error })
+    return res.status(400).json({ error })
   }
 }
 

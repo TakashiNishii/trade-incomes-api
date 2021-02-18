@@ -29,6 +29,4 @@ router.put(
   managerController.incomesPut
 )
 
-router.get('/hello', (_req, res) => res.send('hello'))
-
 module.exports = router
