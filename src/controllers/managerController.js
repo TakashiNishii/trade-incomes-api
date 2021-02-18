@@ -19,8 +19,10 @@ const userPatch = async (req, res) => {
   if (!user) {
     return res.status(404).json({ error: `User not found` })
   }
+
   try {
     let bcryptResult = null
+
     if (password) {
       bcryptResult = await bcrypt.hash(password, 8)
     }
