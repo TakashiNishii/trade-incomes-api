@@ -1,11 +1,11 @@
-const User = require('../models/user')
+const User = require('../../models/user')
 
 const crypto = require('crypto')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
 
-const mailer = require('../modules/mail')
+const mailer = require('../../modules/mail')
 
 const userRegister = async (req, res) => {
   const { name, email, password, cpf, phone } = req.body
