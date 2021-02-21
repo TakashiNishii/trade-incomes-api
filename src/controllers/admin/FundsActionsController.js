@@ -1,5 +1,7 @@
 const Fund = require('../../models/fund')
 const User = require('../../models/user')
+
+const ObjectId = require('mongoose').Types.ObjectId
 const { default: validator } = require('validator')
 
 const insertFund = async (req, res) => {
@@ -32,7 +34,11 @@ const patchFund = async (req, res) => {
   const { id, invested, gained } = req.body
 
   try {
-    const fund = await Fund.findOne().lean()
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'ObjectID malformatted' })
+    }
+
+    const fund = await Fund.findById(id).lean()
 
     if (!fund) {
       return res.status(404).json({ error: 'Fund not found' })
