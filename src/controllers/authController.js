@@ -8,7 +8,7 @@ const validator = require('validator')
 const mailer = require('../modules/mail')
 
 const userRegister = async (req, res) => {
-  const { name, email, password, cpf } = req.body
+  const { name, email, password, cpf, phone } = req.body
 
   try {
     if (!validator.isEmail(email)) {
@@ -31,7 +31,8 @@ const userRegister = async (req, res) => {
       name,
       email,
       password: hashedPass,
-      cpf
+      cpf,
+      phone
     })
 
     return res.json({ name: user.name, email: user.email })

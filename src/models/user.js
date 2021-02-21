@@ -12,6 +12,10 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     lowercase: true
   },
+  phone: {
+    type: String,
+    require: true
+  },
 
   cpf: {
     type: String,
