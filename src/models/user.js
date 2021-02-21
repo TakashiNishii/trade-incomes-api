@@ -30,17 +30,6 @@ const UserSchema = new mongoose.Schema({
     select: false
   },
 
-  incomes: {
-    amountInvested: {
-      type: Number,
-      default: 0
-    },
-    earnedValue: {
-      type: Number,
-      default: 0
-    }
-  },
-
   admin: {
     type: Boolean,
     default: false
