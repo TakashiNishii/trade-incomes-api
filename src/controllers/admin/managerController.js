@@ -1,5 +1,5 @@
 const { default: validator } = require('validator')
-const User = require('../models/user')
+const User = require('../../models/user')
 
 const userPatch = async (req, res) => {
   const { email, newEmail, name } = req.body
