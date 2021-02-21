@@ -55,6 +55,13 @@ const changePassword = async (req, res) => {
 const editProfile = async (req, res) => {
   const { email, newEmail, name, phone, cpf } = req.body
 
+  const token = req.headers.authorization.split(' ')[1]
+  const userSession = jwt.verify(token, process.env.SECRET_KEY)
+
+  if (email !== userSession.email) {
+    return res.status(406).json({ error: 'Not authorized' })
+  }
+
   if (newEmail && !validator.isEmail(newEmail)) {
     return res
       .status(400)
