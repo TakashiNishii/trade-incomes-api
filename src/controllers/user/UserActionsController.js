@@ -52,7 +52,51 @@ const changePassword = async (req, res) => {
   }
 }
 
+const editProfile = async (req, res) => {
+  const { email, newEmail, name, phone, cpf } = req.body
+
+  if (newEmail && !validator.isEmail(newEmail)) {
+    return res
+      .status(400)
+      .json({ error: 'New email address is malformatted' })
+  }
+
+  const userFindedWithNewEmail = await User.findOne({
+    email: newEmail
+  }).lean()
+
+  if (newEmail && userFindedWithNewEmail) {
+    return res.status(404).json({
+      error: `new email is not valid because it's already registered`
+    })
+  }
+
+  const user = await User.findOne({ email }).select('+password')
+
+  if (!user) {
+    return res.status(404).json({ error: `User not found` })
+  }
+
+  try {
+    const userUpdates = {
+      email: newEmail || email,
+      name: name || user.name,
+      phone: phone || user.phone,
+      cpf: cpf || user.cpf
+    }
+
+    const result = await User.updateOne({ _id: user.id }, userUpdates)
+
+    if (result) {
+      return res.json({ message: 'User updated successfully' })
+    }
+  } catch (error) {
+    return res.status(400).json({ error: 'user cannot be updated' })
+  }
+}
+
 module.exports = {
   show,
-  changePassword
+  changePassword,
+  editProfile
 }

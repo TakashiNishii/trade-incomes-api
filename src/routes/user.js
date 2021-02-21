@@ -10,5 +10,10 @@ router.put(
   authMiddleware.verifyUser,
   userController.changePassword
 )
+router.patch(
+  '/profile',
+  authMiddleware.verifyUser,
+  userController.editProfile
+)
 
 module.exports = router
