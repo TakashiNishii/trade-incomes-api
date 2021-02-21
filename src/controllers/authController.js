@@ -8,15 +8,15 @@ const validator = require('validator')
 const mailer = require('../modules/mail')
 
 const userRegister = async (req, res) => {
-  const { name, email, password, cpf, bankData } = req.body
+  const { name, email, password, cpf } = req.body
 
   try {
     if (!validator.isEmail(email)) {
       return res.status(400).json({ error: 'Email is malformatted' })
     }
 
-    const findedEmail = await User.findOne({email}).lean()
-    const findedCpf = await User.findOne({cpf}).lean()
+    const findedEmail = await User.findOne({ email }).lean()
+    const findedCpf = await User.findOne({ cpf }).lean()
 
     if (findedEmail) {
       return res.status(400).json({ error: 'Email already registered' })
@@ -31,10 +31,8 @@ const userRegister = async (req, res) => {
       name,
       email,
       password: hashedPass,
-      cpf,
-      bankData
+      cpf
     })
-
 
     return res.json({ name: user.name, email: user.email })
   } catch (error) {
