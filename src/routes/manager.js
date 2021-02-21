@@ -35,4 +35,10 @@ router.post(
   FundsActionsController.insertFund
 )
 
+router.patch(
+  '/funds',
+  authMiddleware.verifyAdmin,
+  FundsActionsController.patchFund
+)
+
 module.exports = router

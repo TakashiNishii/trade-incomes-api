@@ -10,7 +10,7 @@ const insertFund = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email }).lean()
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' })
@@ -28,6 +28,27 @@ const insertFund = async (req, res) => {
   }
 }
 
+const patchFund = async (req, res) => {
+  const { id, invested, gained } = req.body
+
+  try {
+    const fund = await Fund.findOne().lean()
+
+    if (!fund) {
+      return res.status(404).json({ error: 'Fund not found' })
+    }
+
+    const result = await Fund.updateOne({ _id: id }, { invested, gained })
+
+    if (result) {
+      return res.json({ message: 'Fund updated successfully' })
+    }
+  } catch (error) {
+    return res.status(400).json({ error: 'Cannot update funds' })
+  }
+}
+
 module.exports = {
-  insertFund
+  insertFund,
+  patchFund
 }
