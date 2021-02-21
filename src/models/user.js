@@ -36,27 +36,6 @@ const UserSchema = new mongoose.Schema({
     }
   },
 
-  bankData: {
-    pix: {
-      type: String,
-      default: ''
-    },
-    ted: {
-      agency: {
-        type: String,
-        default: ''
-      },
-      account: {
-        type: String,
-        default: ''
-      },
-      bank: {
-        type: Number,
-        default: 0
-      }
-    }
-  },
-
   admin: {
     type: Boolean,
     default: false
