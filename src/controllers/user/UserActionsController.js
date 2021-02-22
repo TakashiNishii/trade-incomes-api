@@ -4,7 +4,6 @@ const Fund = require('../../models/fund')
 const jwt = require('jsonwebtoken')
 
 const bcrypt = require('bcrypt')
-const { findOne } = require('../../models/user')
 
 const show = async (req, res) => {
   const token = req.headers.authorization.split(' ')[1]
