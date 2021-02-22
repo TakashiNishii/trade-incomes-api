@@ -38,7 +38,11 @@ const indexFunds = async (req, res) => {
     } else {
       return res.status(404).json({ error: 'No funds founded' })
     }
-  } catch (error) {}
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ error: `Cannot search for User's funds` })
+  }
 }
 
 const changePassword = async (req, res) => {
