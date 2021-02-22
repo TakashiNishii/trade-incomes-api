@@ -1,7 +1,10 @@
 const User = require('../../models/user')
+const Fund = require('../../models/fund')
+
 const jwt = require('jsonwebtoken')
 
 const bcrypt = require('bcrypt')
+const { findOne } = require('../../models/user')
 
 const show = async (req, res) => {
   const token = req.headers.authorization.split(' ')[1]
@@ -20,6 +23,24 @@ const show = async (req, res) => {
     return res.status(400).json({ error })
   }
 }
+
+const indexFunds = async (req, res) => {
+  const token = req.headers.authorization.split(' ')[1]
+  const session = jwt.verify(token, process.env.SECRET_KEY)
+
+  try {
+    const user = await User.findOne({ email: session.email })
+
+    const funds = await Fund.find({ userOwner: user._id })
+
+    if (funds.length) {
+      return res.json({ funds })
+    } else {
+      return res.status(404).json({ error: 'No funds founded' })
+    }
+  } catch (error) {}
+}
+
 const changePassword = async (req, res) => {
   const { email, newPassword, oldPassword } = req.body
 
@@ -105,5 +126,6 @@ const editProfile = async (req, res) => {
 module.exports = {
   show,
   changePassword,
-  editProfile
+  editProfile,
+  indexFunds
 }
