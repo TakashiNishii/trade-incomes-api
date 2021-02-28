@@ -18,7 +18,7 @@ router.patch(
 )
 
 router.get(
-  '/user',
+  '/users',
   authMiddleware.verifyAdmin,
   UserActionsController.userIndex
 )
