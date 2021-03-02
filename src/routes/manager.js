@@ -23,6 +23,12 @@ router.get(
   UserActionsController.userIndex
 )
 
+router.get(
+  '/user/:id',
+  authMiddleware.verifyAdmin,
+  UserActionsController.userShow
+)
+
 router.post(
   '/funds',
   authMiddleware.verifyAdmin,
